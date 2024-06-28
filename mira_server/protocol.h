@@ -1,5 +1,5 @@
-#ifndef MIRA_SERVER_PACKETS_H
-#define MIRA_SERVER_PACKETS_H
+#ifndef MIRA_SERVER_PROTOCOL_H
+#define MIRA_SERVER_PROTOCOL_H
 
 #include "common.h"
 
@@ -11,14 +11,14 @@ enum {
 };
 
 typedef struct {
-	char* domain;
-	char* path;
-} Packet_Get;
+	const char* domain;
+	const char* path;
+} GetRequest;
 
 typedef struct {
-	uint8_t  errorCode;
+	uint8_t  error;
 	uint64_t length;
 	uint8_t* contents;
-} PacketRes_Get;
+} GetResponse;
 
 #endif

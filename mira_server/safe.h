@@ -4,6 +4,6 @@
 #include "common.h"
 
 void* SafeMalloc(size_t size);
-void* SafeRealloc(void* ptr, size_t size);
+void* SafeRealloc(const void* ptr, size_t size);
 
 #endif

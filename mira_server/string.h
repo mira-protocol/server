@@ -4,6 +4,6 @@
 #include "common.h"
 
 char* String_New(const char* src);
-char* String_AddChar(char* str, char ch);
+char* String_AddChar(const char* str, char ch);
 
 #endif

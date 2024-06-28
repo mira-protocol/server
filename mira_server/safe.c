@@ -12,8 +12,8 @@ void* SafeMalloc(size_t size) {
 	return ret;
 }
 
-void* SafeRealloc(void* ptr, size_t size) {
-	void* ret = realloc(ptr, size);
+void* SafeRealloc(const void* ptr, size_t size) {
+	void* ret = realloc((void*) ptr, size);
 
 	if (ret == NULL) {
 		perror("realloc");

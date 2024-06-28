@@ -12,6 +12,7 @@ Server Server_Init(uint16_t port) {
 	ret.sock       = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
 	ret.clients    = NULL;
 	ret.numClients = 0;
+	ret.getFunc    = 0;
 
 	if (ret.sock == -1) {
 		perror("socket");
@@ -72,8 +73,9 @@ void Server_Update(Server* server) {
 
 		server->clients[server->numClients].completed = false;
 
-		params->sock   = newSock;
-		params->thread = server->clients + server->numClients;
+		params->sock    = newSock;
+		params->getFunc = server->getFunc;
+		params->thread  = server->clients + server->numClients;
 
 		pthread_create(
 			&server->clients[server->numClients].thread, NULL, &ClientWorker, (void*) params

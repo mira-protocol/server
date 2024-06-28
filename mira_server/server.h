@@ -7,6 +7,8 @@ typedef struct {
 	int sock;
 	ClientThread* clients;
 	size_t        numClients;
+
+	void (*getFunc)(GetRequest*, GetResponse*);
 } Server;
 
 Server Server_Init(uint16_t port);
