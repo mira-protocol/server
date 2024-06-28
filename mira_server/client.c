@@ -67,8 +67,8 @@ void* ClientWorker(void* pparams) {
 				uint64_t length = res.length;
 				res.length = htonll(res.length);
 
-				//if (send(params->sock, &res.error, sizeof(res.error), 0) < 0)   WORKER_EXIT;
-				//if (send(params->sock, &res.length, sizeof(res.length), 0) < 0) WORKER_EXIT;
+				if (send(params->sock, &res.error, sizeof(res.error), 0) < 0)   WORKER_EXIT;
+				if (send(params->sock, &res.length, sizeof(res.length), 0) < 0) WORKER_EXIT;
 
 				if (length > 0) {
 					if (send(params->sock, res.contents, length, 0) < 0) WORKER_EXIT;
