@@ -9,7 +9,7 @@
 Server Server_Init(uint16_t port) {
 	Server ret;
 
-	ret.sock       = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	ret.sock       = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
 	ret.clients    = NULL;
 	ret.numClients = 0;
 
@@ -28,7 +28,7 @@ Server Server_Init(uint16_t port) {
 	struct sockaddr_in addr;
 	addr.sin_family      = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
-	addr.sin_port        = port;
+	addr.sin_port        = htons(port);
 
 	if (bind(ret.sock, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
 		perror("bind");

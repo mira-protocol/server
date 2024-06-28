@@ -3,7 +3,7 @@
 #include <mira_server/server.h>
 
 int main(void) {
-	Server server = Server_Init(84);
+	Server server = Server_Init(25565);
 
 	while (true) {
 		Server_Update(&server);
