@@ -81,4 +81,22 @@ void Server_Update(Server* server) {
 			&server->clients[server->numClients].thread, NULL, &ClientWorker, (void*) params
 		);
 	}
+
+	// remove disconnected clients
+	for (size_t i = 0; i < server->numClients; ++ i) {
+		if (server->clients[i].completed) {
+			pthread_join(server->clients[i].thread, NULL);
+
+			for (size_t j = i + 1; j < server->numClients; ++ j) {
+				server->clients[j - 1] = server->clients[j];
+			}
+
+			-- server->numClients;
+			server->clients = SafeRealloc(
+				server->clients, server->numClients * sizeof(ClientThread)
+			);
+			puts("removed a client");
+			break;
+		}
+	}
 }

@@ -1,3 +1,6 @@
+#include <time.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -14,15 +17,34 @@
 	return NULL; \
 } while (0)
 
+static void SetSocketBlocks(int fd, bool blocks) {
+	int flags = fcntl(fd, F_GETFL, 0);
+
+	flags = blocks? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+
+	fcntl(fd, F_SETFL, flags);
+}
+
 void* ClientWorker(void* pparams) {
 	puts("New client worker");
 	ClientParams* params = (ClientParams*) pparams;
 
+	time_t timer = time(NULL);
+
 	while (true) {
+		SetSocketBlocks(params->sock, false);
+
 		uint8_t packetID;
 		ssize_t size = recv(params->sock, &packetID, 1, MSG_WAITALL);
 
-		if (size < 0) WORKER_EXIT;
+		if (size < 0) {
+			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				goto ping;
+			}
+			else WORKER_EXIT;
+		}
+
+		SetSocketBlocks(params->sock, true);
 
 		switch (packetID) {
 			// GET packet
@@ -83,6 +105,16 @@ void* ClientWorker(void* pparams) {
 				fprintf(stderr, "Invalid packet ID '%.2X'\n", packetID);
 				WORKER_EXIT;
 			}
+		}
+
+		SetSocketBlocks(params->sock, false);
+
+		ping:
+		if (time(NULL) - timer > 0) {
+			puts("sending ping packet");
+			uint8_t pingPacket = 'P';
+			if (send(params->sock, &pingPacket, 1, 0) < 0) WORKER_EXIT;
+			timer = time(NULL);
 		}
 	}
 
