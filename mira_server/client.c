@@ -17,14 +17,6 @@
 	return NULL; \
 } while (0)
 
-static void SetSocketBlocks(int fd, bool blocks) {
-	int flags = fcntl(fd, F_GETFL, 0);
-
-	flags = blocks? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-
-	fcntl(fd, F_SETFL, flags);
-}
-
 void* ClientWorker(void* pparams) {
 	puts("New client worker");
 	ClientParams* params = (ClientParams*) pparams;
