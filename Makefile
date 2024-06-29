@@ -8,7 +8,6 @@ BIN_DIRS       = $(BIN_DIR) $(addprefix $(BIN_DIR)/,$(SERVER_LIB_DIR) $(SERVER_D
 # path to generated libraries. Must have forward slash postfix if not left
 # empty (root).
 LIB_PATH =
-LIB_EXT  =
 
 OS ?= $(shell uname -s)
 ifeq ($(OS),Darwin)
@@ -37,6 +36,7 @@ SERVER_EXE  = mira-server
 
 # compiler flags
 FLAGS = -std=c11 -Wall -Wextra -pedantic -g -I.
+LIBS  = -lpthread -L. -l$(SERVER_SLIB_NAME)
 
 compile: $(BIN_DIRS) $(SERVER_SLIB_FULL) $(SERVER_EXE)
 
@@ -56,10 +56,10 @@ $(SERVER_EXE): $(SERVER_OBJ) $(SERVER_SLIB_FULL)
 	$(CC) $(FLAGS) $^ -o $@ $(LIBS)
 
 $(BIN_DIR)/$(SERVER_LIB_DIR)/%.o: $(SERVER_LIB_DIR)/%.c $(BIN_DIRS)
-	$(CC) $(FLAGS) -fpic -c $< -o $@
+	$(CC) $(FLAGS) -c $< -o $@
 
-$(SERVER_LIB_FULL): $(BIN_DIRS) $(SERVER_LIB_OBJ) $(SERVER_LIB_DEPS)
-	$(CC) $(FLAGS) -shared $(SERVER_LIB_OBJ) -o $@
+$(SERVER_SLIB_FULL): $(BIN_DIRS) $(SERVER_SLIB_OBJ) $(SERVER_SLIB_DEPS)
+	ar -rcs $@ $(SERVER_SLIB_OBJ)
 
 $(BIN_DIRS):
 	-mkdir $@
