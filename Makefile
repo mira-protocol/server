@@ -9,13 +9,6 @@ BIN_DIRS       = $(BIN_DIR) $(addprefix $(BIN_DIR)/,$(SERVER_LIB_DIR) $(SERVER_D
 # empty (root).
 LIB_PATH =
 
-OS ?= $(shell uname -s)
-ifeq ($(OS),Darwin)
-	LIB_EXT = dylib
-endif
-ifeq ($(OS),Linux)
-	LIB_EXT = so
-endif
 ifeq ($(OS),Windows_NT)
 	$(error "Platform support not implemented")
 endif
