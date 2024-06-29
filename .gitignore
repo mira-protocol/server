@@ -1,2 +1,7 @@
 mira-server
 bin
+*.so
+*.dylib
+
+.cache/
+compile_commands.json
