@@ -1,5 +1,6 @@
 mira-server
 bin
+*.a
 *.so
 *.dylib
 
