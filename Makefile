@@ -1,23 +1,66 @@
-SRC    = $(wildcard server/*.c) $(wildcard server/**/*.c)
-DEPS   = $(wildcard server/*.h) $(wildcard server/**/*.h)
-DEPS  += $(wildcard mira_server/*)
-OBJ    = $(addsuffix .o,$(subst server/,bin/,$(basename ${SRC})))
-OUT    = mira-server
-FLAGS  = -std=c99 -Wall -Wextra -pedantic -g -I.
-LIBS   = -lpthread
+# paths
+SERVER_LIB_DIR = mira_server
+SERVER_DIR     = server
+BIN_DIR        = bin
+BIN_DIRS       = $(BIN_DIR) $(addprefix $(BIN_DIR)/,$(SERVER_LIB_DIR) $(SERVER_DIR))
 
-compile: ./bin $(OBJ) $(SRC) $(DEPS)
-	$(CC) $(OBJ) $(LIBS) -o $(OUT)
+# library
+# path to generated libraries. Must have forward slash postfix if not left
+# empty (root).
+LIB_PATH =
+LIB_EXT  =
 
-./bin:
-	mkdir -p bin
+OS ?= $(shell uname -s)
+ifeq ($(OS),Darwin)
+	LIB_EXT = dylib
+endif
+ifeq ($(OS),Linux)
+	LIB_EXT = so
+endif
+ifeq ($(OS),Windows_NT)
+	$(error "Platform support not implemented")
+endif
 
-bin/%.o: server/%.c $(DEPS)
-	$(CC) -c $< $(FLAGS) -o $@
+# server library
+SERVER_LIB_SRC  = $(wildcard $(SERVER_LIB_DIR)/*.c)
+SERVER_LIB_DEPS = $(wildcard $(SERVER_LIB_DIR)/*.h)
+SERVER_LIB_OBJ  = $(patsubst $(SERVER_LIB_DIR)/%.c,$(BIN_DIR)/$(SERVER_LIB_DIR)/%.o,$(SERVER_LIB_SRC))
+SERVER_LIB_PATH = $(LIB_PATH)
+SERVER_LIB_NAME = miraserver
+SERVER_LIB_FULL = $(SERVER_LIB_PATH)lib$(SERVER_LIB_NAME).$(LIB_EXT)
+
+# server
+SERVER_SRC  = $(wildcard $(SERVER_DIR)/*.c)
+SERVER_DEPS = $(wildcard $(SERVER_DIR)/*.h)
+SERVER_OBJ  = $(patsubst $(SERVER_DIR)/%.c,$(BIN_DIR)/$(SERVER_DIR)/%.o,$(SERVER_SRC))
+SERVER_EXE  = mira-server
+
+# compiler flags
+FLAGS = -std=c11 -Wall -Wextra -pedantic -g -I.
+LIBS  = -lpthread -L. -l$(SERVER_LIB_NAME)
+
+compile: $(BIN_DIRS) $(SERVER_LIB_FULL) $(SERVER_EXE)
 
 clean:
-	rm -r bin/* $(OUT)
-	if [ -f bin ]; then rm -r bin; fi
-	if [ -f $(OUT) ]; then rm $(OUT); fi
+	-rm -rf $(BIN_DIR) $(SERVER_LIB_FULL) $(SERVER_EXE)
 
+dump:
+	@echo "src: $(SERVER_LIB_SRC)"
+	@echo "deps: $(SERVER_LIB_DEPS)"
+	@echo "obj: $(SERVER_LIB_OBJ)"
+	@echo "lib: $(SERVER_LIB_FULL)"
 
+$(BIN_DIR)/$(SERVER_DIR)/%.o: $(SERVER_DIR)/%.c $(BIN_DIRS)
+	$(CC) $(FLAGS) -c $< -o $@
+
+$(SERVER_EXE): $(SERVER_OBJ) $(SERVER_LIB_FULL)
+	$(CC) $(FLAGS) $^ -o $@ $(LIBS)
+
+$(BIN_DIR)/$(SERVER_LIB_DIR)/%.o: $(SERVER_LIB_DIR)/%.c $(BIN_DIRS)
+	$(CC) $(FLAGS) -fpic -c $< -o $@
+
+$(SERVER_LIB_FULL): $(BIN_DIRS) $(SERVER_LIB_OBJ) $(SERVER_LIB_DEPS)
+	$(CC) $(FLAGS) -shared $(SERVER_LIB_OBJ) -o $@
+
+$(BIN_DIRS):
+	-mkdir $@
