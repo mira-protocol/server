@@ -13,7 +13,12 @@
 Server Server_Init(uint16_t port) {
 	Server ret;
 
+#if __APPLE__
+	ret.sock       = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SetSocketBlocks(ret.sock, false);	
+#else
 	ret.sock       = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
+#endif
 	ret.clients    = NULL;
 	ret.numClients = 0;
 	ret.getFunc    = 0;
