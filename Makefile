@@ -21,13 +21,13 @@ ifeq ($(OS),Windows_NT)
 	$(error "Platform support not implemented")
 endif
 
-# server library
-SERVER_LIB_SRC  = $(wildcard $(SERVER_LIB_DIR)/*.c)
-SERVER_LIB_DEPS = $(wildcard $(SERVER_LIB_DIR)/*.h)
-SERVER_LIB_OBJ  = $(patsubst $(SERVER_LIB_DIR)/%.c,$(BIN_DIR)/$(SERVER_LIB_DIR)/%.o,$(SERVER_LIB_SRC))
-SERVER_LIB_PATH = $(LIB_PATH)
-SERVER_LIB_NAME = miraserver
-SERVER_LIB_FULL = $(SERVER_LIB_PATH)lib$(SERVER_LIB_NAME).$(LIB_EXT)
+# server static library
+SERVER_SLIB_SRC  = $(wildcard $(SERVER_LIB_DIR)/*.c)
+SERVER_SLIB_DEPS = $(wildcard $(SERVER_LIB_DIR)/*.h)
+SERVER_SLIB_OBJ  = $(patsubst $(SERVER_LIB_DIR)/%.c,$(BIN_DIR)/$(SERVER_LIB_DIR)/%.o,$(SERVER_SLIB_SRC))
+SERVER_SLIB_PATH = $(LIB_PATH)
+SERVER_SLIB_NAME = miraserver
+SERVER_SLIB_FULL = $(SERVER_LIB_PATH)lib$(SERVER_SLIB_NAME).a
 
 # server
 SERVER_SRC  = $(wildcard $(SERVER_DIR)/*.c)
@@ -37,23 +37,22 @@ SERVER_EXE  = mira-server
 
 # compiler flags
 FLAGS = -std=c11 -Wall -Wextra -pedantic -g -I.
-LIBS  = -lpthread -L. -l$(SERVER_LIB_NAME)
 
-compile: $(BIN_DIRS) $(SERVER_LIB_FULL) $(SERVER_EXE)
+compile: $(BIN_DIRS) $(SERVER_SLIB_FULL) $(SERVER_EXE)
 
 clean:
-	-rm -rf $(BIN_DIR) $(SERVER_LIB_FULL) $(SERVER_EXE)
+	-rm -rf $(BIN_DIR) $(SERVER_SLIB_FULL) $(SERVER_EXE)
 
 dump:
-	@echo "src: $(SERVER_LIB_SRC)"
-	@echo "deps: $(SERVER_LIB_DEPS)"
-	@echo "obj: $(SERVER_LIB_OBJ)"
-	@echo "lib: $(SERVER_LIB_FULL)"
+	@echo "src: $(SERVER_SLIB_SRC)"
+	@echo "deps: $(SERVER_SLIB_DEPS)"
+	@echo "obj: $(SERVER_SLIB_OBJ)"
+	@echo "lib: $(SERVER_SLIB_FULL)"
 
 $(BIN_DIR)/$(SERVER_DIR)/%.o: $(SERVER_DIR)/%.c $(BIN_DIRS)
 	$(CC) $(FLAGS) -c $< -o $@
 
-$(SERVER_EXE): $(SERVER_OBJ) $(SERVER_LIB_FULL)
+$(SERVER_EXE): $(SERVER_OBJ) $(SERVER_SLIB_FULL)
 	$(CC) $(FLAGS) $^ -o $@ $(LIBS)
 
 $(BIN_DIR)/$(SERVER_LIB_DIR)/%.o: $(SERVER_LIB_DIR)/%.c $(BIN_DIRS)
