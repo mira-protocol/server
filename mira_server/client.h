@@ -2,19 +2,26 @@
 #define MIRA_SERVER_CLIENT_H
 
 #include <pthread.h>
-#include "protocol.h"
+#include "common.h"
 
-typedef struct {
+typedef struct GetRequest GetRequest;
+typedef struct GetResponse GetResponse;
+
+typedef struct ClientThread ClientThread;
+typedef struct ClientParams ClientParams;
+
+
+struct ClientThread {
 	pthread_t thread;
 	bool      completed;
-} ClientThread;
+};
 
-typedef struct {
+struct ClientParams {
 	int           sock;
 	ClientThread* thread;
 
 	void (*getFunc)(GetRequest*, GetResponse*);
-} ClientParams;
+};
 
 void* ClientWorker(void* pparams);
 

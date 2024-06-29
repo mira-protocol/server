@@ -3,13 +3,19 @@
 
 #include "common.h"
 
-typedef struct {
+typedef struct ClientThread ClientThread;
+typedef struct GetRequest GetRequest;
+typedef struct GetResponse GetResponse;
+
+typedef struct Server Server;
+
+struct Server {
 	int sock;
 	ClientThread* clients;
 	size_t        numClients;
 
 	void (*getFunc)(GetRequest*, GetResponse*);
-} Server;
+};
 
 Server Server_Init(uint16_t port);
 void   Server_Free(Server* server);

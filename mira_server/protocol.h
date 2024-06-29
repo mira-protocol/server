@@ -10,15 +10,18 @@ enum {
 	ERROR_CODE_UNKNOWN_DOMAIN = 3
 };
 
-typedef struct {
+typedef struct GetRequest GetRequest;
+typedef struct GetResponse GetResponse;
+
+struct GetRequest {
 	const char* domain;
 	const char* path;
-} GetRequest;
+};
 
-typedef struct {
+struct GetResponse {
 	uint8_t  error;
 	uint64_t length;
 	uint8_t* contents;
-} GetResponse;
+};
 
 #endif

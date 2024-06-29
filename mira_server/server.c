@@ -4,7 +4,11 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "protocol.h"
 #include "server.h"
+#include "client.h"
+#include "safe.h"
+#include "utils.h"
 
 Server Server_Init(uint16_t port) {
 	Server ret;
