@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include <mira_server/source.c>
+#include <string.h>
+#include <mira_server/protocol.h>
 #include <mira_server/server.h>
 #include <mira_server/client.h>
 #include <mira_server/string.h>
