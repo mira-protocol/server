@@ -1,23 +1,58 @@
-SRC    = $(wildcard server/*.c) $(wildcard server/**/*.c)
-DEPS   = $(wildcard server/*.h) $(wildcard server/**/*.h)
-DEPS  += $(wildcard mira_server/*)
-OBJ    = $(addsuffix .o,$(subst server/,bin/,$(basename ${SRC})))
-OUT    = mira-server
-FLAGS  = -std=c99 -Wall -Wextra -pedantic -g -I.
-LIBS   = -lpthread
+# paths
+SERVER_LIB_DIR = mira_server
+SERVER_DIR     = server
+BIN_DIR        = bin
+BIN_DIRS       = $(BIN_DIR) $(addprefix $(BIN_DIR)/,$(SERVER_LIB_DIR) $(SERVER_DIR))
 
-compile: ./bin $(OBJ) $(SRC) $(DEPS)
-	$(CC) $(OBJ) $(LIBS) -o $(OUT)
+# library
+# path to generated libraries. Must have forward slash postfix if not left
+# empty (root).
+LIB_PATH =
 
-./bin:
-	mkdir -p bin
+ifeq ($(OS),Windows_NT)
+	$(error "Platform support not implemented")
+endif
 
-bin/%.o: server/%.c $(DEPS)
-	$(CC) -c $< $(FLAGS) -o $@
+# server static library
+SERVER_SLIB_SRC  = $(wildcard $(SERVER_LIB_DIR)/*.c)
+SERVER_SLIB_DEPS = $(wildcard $(SERVER_LIB_DIR)/*.h)
+SERVER_SLIB_OBJ  = $(patsubst $(SERVER_LIB_DIR)/%.c,$(BIN_DIR)/$(SERVER_LIB_DIR)/%.o,$(SERVER_SLIB_SRC))
+SERVER_SLIB_PATH = $(LIB_PATH)
+SERVER_SLIB_NAME = miraserver
+SERVER_SLIB_FULL = $(SERVER_LIB_PATH)lib$(SERVER_SLIB_NAME).a
+
+# server
+SERVER_SRC  = $(wildcard $(SERVER_DIR)/*.c)
+SERVER_DEPS = $(wildcard $(SERVER_DIR)/*.h)
+SERVER_OBJ  = $(patsubst $(SERVER_DIR)/%.c,$(BIN_DIR)/$(SERVER_DIR)/%.o,$(SERVER_SRC))
+SERVER_EXE  = mira-server
+
+# compiler flags
+FLAGS = -std=c11 -Wall -Wextra -pedantic -g -I.
+LIBS  = -lpthread -L. -l$(SERVER_SLIB_NAME)
+
+compile: $(BIN_DIRS) $(SERVER_SLIB_FULL) $(SERVER_EXE)
 
 clean:
-	rm -r bin/* $(OUT)
-	if [ -f bin ]; then rm -r bin; fi
-	if [ -f $(OUT) ]; then rm $(OUT); fi
+	-rm -rf $(BIN_DIR) $(SERVER_SLIB_FULL) $(SERVER_EXE)
 
+dump:
+	@echo "src: $(SERVER_SLIB_SRC)"
+	@echo "deps: $(SERVER_SLIB_DEPS)"
+	@echo "obj: $(SERVER_SLIB_OBJ)"
+	@echo "lib: $(SERVER_SLIB_FULL)"
 
+$(BIN_DIR)/$(SERVER_DIR)/%.o: $(SERVER_DIR)/%.c $(BIN_DIRS)
+	$(CC) $(FLAGS) -c $< -o $@
+
+$(SERVER_EXE): $(SERVER_OBJ) $(SERVER_SLIB_FULL)
+	$(CC) $(FLAGS) $^ -o $@ $(LIBS)
+
+$(BIN_DIR)/$(SERVER_LIB_DIR)/%.o: $(SERVER_LIB_DIR)/%.c $(BIN_DIRS)
+	$(CC) $(FLAGS) -c $< -o $@
+
+$(SERVER_SLIB_FULL): $(BIN_DIRS) $(SERVER_SLIB_OBJ) $(SERVER_SLIB_DEPS)
+	ar -rcs $@ $(SERVER_SLIB_OBJ)
+
+$(BIN_DIRS):
+	-mkdir $@

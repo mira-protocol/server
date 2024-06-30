@@ -4,10 +4,11 @@
 #include <pthread.h>
 #include "protocol.h"
 
-typedef struct {
+struct ClientThread {
 	pthread_t thread;
 	bool      completed;
-} ClientThread;
+};
+typedef struct ClientThread ClientThread;
 
 typedef struct {
 	int           sock;

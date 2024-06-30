@@ -2,11 +2,14 @@
 #define MIRA_SERVER_SERVER_H
 
 #include "common.h"
+#include "protocol.h"
+
+struct ClientThread;
 
 typedef struct {
 	int sock;
-	ClientThread* clients;
-	size_t        numClients;
+	struct ClientThread* clients;
+	size_t               numClients;
 
 	void (*getFunc)(GetRequest*, GetResponse*);
 } Server;
