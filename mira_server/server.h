@@ -7,7 +7,7 @@
 struct ClientThread;
 
 typedef struct {
-	int sock;
+	int                  sock;
 	struct ClientThread* clients;
 	size_t               numClients;
 

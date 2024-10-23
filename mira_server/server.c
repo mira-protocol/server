@@ -77,7 +77,7 @@ void Server_Update(Server* server) {
 
 		params->sock    = newSock;
 		params->getFunc = server->getFunc;
-		params->thread  = server->clients + server->numClients;
+		params->thread  = &server->clients[server->numClients];
 
 		pthread_create(
 			&server->clients[server->numClients].thread, NULL, &ClientWorker, (void*) params
@@ -87,6 +87,7 @@ void Server_Update(Server* server) {
 	// remove disconnected clients
 	for (size_t i = 0; i < server->numClients; ++ i) {
 		if (server->clients[i].completed) {
+			puts("client disconnected, removing");
 			pthread_join(server->clients[i].thread, NULL);
 
 			for (size_t j = i + 1; j < server->numClients; ++ j) {

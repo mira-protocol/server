@@ -14,6 +14,7 @@
 #define WORKER_EXIT do { \
 	params->thread->completed = true; \
 	free(params); \
+	puts("Client exit"); \
 	return NULL; \
 } while (0)
 
@@ -111,12 +112,11 @@ void* ClientWorker(void* pparams) {
 		SetSocketBlocks(params->sock, false);
 
 		ping:
-		/*if (time(NULL) - timer > 0) {
+		if (time(NULL) - timer > 0) {
 			puts("sending ping packet");
-			uint8_t pingPacket = 'P';
-			if (send(params->sock, &pingPacket, 1, 0) < 0) WORKER_EXIT;
+			if (send(params->sock, NULL, 0, 0) < 0) WORKER_EXIT;
 			timer = time(NULL);
-		}*/
+		}
 	}
 
 	WORKER_EXIT;
